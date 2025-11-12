@@ -9,13 +9,13 @@ int arkanoid()
     RenderWindow app(VideoMode(520, 450), "Arkanoid!");
     app.setFramerateLimit(60);
 
-    Texture t1,t2,t3,t4;
-    t1.loadFromFile("images/arkanoid/block01.png");
-    t2.loadFromFile("images/arkanoid/background.jpg");
-    t3.loadFromFile("images/arkanoid/ball.png");
-    t4.loadFromFile("images/arkanoid/paddle.png");
+    Texture textureBlock,textureBackground,textureBall,texturePaddle;
+    textureBlock.loadFromFile("images/arkanoid/block01.png");
+    textureBackground.loadFromFile("images/arkanoid/background.jpg");
+    textureBall.loadFromFile("images/arkanoid/ball.png");
+    texturePaddle.loadFromFile("images/arkanoid/paddle.png");
 
-    Sprite sBackground(t2), sBall(t3), sPaddle(t4);
+    Sprite sBackground(textureBackground), sBall(textureBall), sPaddle(texturePaddle);
     sPaddle.setPosition(300,440);
 
     Sprite block[1000];
@@ -24,7 +24,7 @@ int arkanoid()
     for (int i=1;i<=10;i++)
     for (int j=1;j<=10;j++)
       {
-         block[n].setTexture(t1);
+         block[n].setTexture(textureBlock);
          block[n].setPosition(i*43,j*20);
          n++;
       }
