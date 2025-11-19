@@ -39,36 +39,38 @@ int arkanoid()
     }
 
     float xBallSpeed=6, yBallSpeed=5;
-    float x=300, y=300;
+    float xPositionBall=300, yPositionBall=300;
 
     while (app.isOpen())
     {
-       Event e;
-       while (app.pollEvent(e))
+       Event gameOpened;
+       while (app.pollEvent(gameOpened))
        {
-         if (e.type == Event::Closed)
-             app.close();
+           if (gameOpened.type == Event::Closed)
+           {
+               app.close();
+           }
        }
 
-    x+=xBallSpeed;
+    xPositionBall+=xBallSpeed;
     for (int i=0;i< numberOfCurrentBlock;i++)
-        if ( FloatRect(x+3,y+3,6,6).intersects(block[i].getGlobalBounds()) ) 
+        if ( FloatRect(xPositionBall+3,yPositionBall+3,6,6).intersects(block[i].getGlobalBounds()) ) 
              {block[i].setPosition(-100,0); xBallSpeed=-xBallSpeed;}
 
-    y+=yBallSpeed;
+    yPositionBall+=yBallSpeed;
     for (int i=0;i< numberOfCurrentBlock;i++)
-        if ( FloatRect(x+3,y+3,6,6).intersects(block[i].getGlobalBounds()) ) 
+        if ( FloatRect(xPositionBall+3,yPositionBall+3,6,6).intersects(block[i].getGlobalBounds()) ) 
              {block[i].setPosition(-100,0); yBallSpeed=-yBallSpeed;}
 
-    if (x<0 || x>520)  xBallSpeed=-xBallSpeed;
-    if (y<0 || y>450)  yBallSpeed=-yBallSpeed;
+    if (xPositionBall<0 || xPositionBall>520)  xBallSpeed=-xBallSpeed;
+    if (yPositionBall<0 || yPositionBall>450)  yBallSpeed=-yBallSpeed;
 
     if (Keyboard::isKeyPressed(Keyboard::Right)) spritePaddle.move(6,0);
     if (Keyboard::isKeyPressed(Keyboard::Left)) spritePaddle.move(-6,0);
 
-    if ( FloatRect(x,y,12,12).intersects(spritePaddle.getGlobalBounds()) ) yBallSpeed=-(rand()%5+2);
+    if ( FloatRect(xPositionBall,yPositionBall,12,12).intersects(spritePaddle.getGlobalBounds()) ) yBallSpeed=-(rand()%5+2);
 
-    spriteBall.setPosition(x,y);
+    spriteBall.setPosition(xPositionBall,yPositionBall);
 
     app.clear();
     app.draw(spriteBackground);
