@@ -18,16 +18,23 @@ int arkanoid()
     Sprite spriteBackground(textureBackground), spriteBall(textureBall), spritePaddle(texturePaddle);
     spritePaddle.setPosition(300,440);
 
-    Sprite block[1000];
+    int const MAX_NUMBER_OF_BLOCKS = 100;
+
+    Sprite block[MAX_NUMBER_OF_BLOCKS];
+
+    int const MAX_ROW = 10;
+    int const MAX_COLUMN = 10;
 
     int numberOfCurrentBlock=0;
-    for (int i=1;i<=10;i++)
-    for (int j=1;j<=10;j++)
-      {
-         block[numberOfCurrentBlock].setTexture(textureBlock);
-         block[numberOfCurrentBlock].setPosition(i*43,j*20);
-         numberOfCurrentBlock++;
-      }
+    for (int currentRow = 1; currentRow <= MAX_ROW; currentRow++)
+    {
+        for (int currentColumn = 1; currentColumn <= MAX_COLUMN; currentColumn++)
+        {
+            block[numberOfCurrentBlock].setTexture(textureBlock);
+            block[numberOfCurrentBlock].setPosition(currentRow * 43, currentColumn * 20);
+            numberOfCurrentBlock++;
+        }
+    }
 
     float dx=6, dy=5;
     float x=300, y=300;
@@ -66,8 +73,10 @@ int arkanoid()
     app.draw(spriteBall);
     app.draw(spritePaddle);
 
-    for (int i=0;i< numberOfCurrentBlock;i++)
-     app.draw(block[i]);
+    for (int i = 0; i < numberOfCurrentBlock; i++)
+    {
+        app.draw(block[i]);
+    }
 
     app.display();
     }
