@@ -19,6 +19,8 @@ int arkanoid()
     spritePaddle.setPosition(300,440);
 
     int const MAX_NUMBER_OF_BLOCKS = 100;
+    int const WIDTH_OF_BLOCK = 43;
+    int const HEIGHT_OF_BLOCK = 20;
 
     Sprite block[MAX_NUMBER_OF_BLOCKS];
 
@@ -31,12 +33,12 @@ int arkanoid()
         for (int currentRow = 1; currentRow <= MAX_COLUMN; currentRow++)
         {
             block[numberOfCurrentBlock].setTexture(textureBlock);
-            block[numberOfCurrentBlock].setPosition(currentColumn * 43, currentRow * 20);
+            block[numberOfCurrentBlock].setPosition(currentColumn * WIDTH_OF_BLOCK, currentRow * HEIGHT_OF_BLOCK);
             numberOfCurrentBlock++;
         }
     }
 
-    float dx=6, dy=5;
+    float xBallSpeed=6, yBallSpeed=5;
     float x=300, y=300;
 
     while (app.isOpen())
@@ -48,23 +50,23 @@ int arkanoid()
              app.close();
        }
 
-    x+=dx;
+    x+=xBallSpeed;
     for (int i=0;i< numberOfCurrentBlock;i++)
         if ( FloatRect(x+3,y+3,6,6).intersects(block[i].getGlobalBounds()) ) 
-             {block[i].setPosition(-100,0); dx=-dx;}
+             {block[i].setPosition(-100,0); xBallSpeed=-xBallSpeed;}
 
-    y+=dy;
+    y+=yBallSpeed;
     for (int i=0;i< numberOfCurrentBlock;i++)
         if ( FloatRect(x+3,y+3,6,6).intersects(block[i].getGlobalBounds()) ) 
-             {block[i].setPosition(-100,0); dy=-dy;}
+             {block[i].setPosition(-100,0); yBallSpeed=-yBallSpeed;}
 
-    if (x<0 || x>520)  dx=-dx;
-    if (y<0 || y>450)  dy=-dy;
+    if (x<0 || x>520)  xBallSpeed=-xBallSpeed;
+    if (y<0 || y>450)  yBallSpeed=-yBallSpeed;
 
     if (Keyboard::isKeyPressed(Keyboard::Right)) spritePaddle.move(6,0);
     if (Keyboard::isKeyPressed(Keyboard::Left)) spritePaddle.move(-6,0);
 
-    if ( FloatRect(x,y,12,12).intersects(spritePaddle.getGlobalBounds()) ) dy=-(rand()%5+2);
+    if ( FloatRect(x,y,12,12).intersects(spritePaddle.getGlobalBounds()) ) yBallSpeed=-(rand()%5+2);
 
     spriteBall.setPosition(x,y);
 
