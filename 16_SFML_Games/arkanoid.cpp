@@ -53,14 +53,21 @@ int arkanoid()
        }
 
     xPositionBall+=xBallSpeed;
-    for (int i=0;i< numberOfCurrentBlock;i++)
-        if ( FloatRect(xPositionBall+3,yPositionBall+3,6,6).intersects(block[i].getGlobalBounds()) ) 
-             {block[i].setPosition(-100,0); xBallSpeed=-xBallSpeed;}
-
+    for (int checkBlockCollisionWithBallX = 0; checkBlockCollisionWithBallX < MAX_NUMBER_OF_BLOCKS; checkBlockCollisionWithBallX++)
+    {
+        if (FloatRect(xPositionBall + 3, yPositionBall + 3, 6, 6).intersects(block[checkBlockCollisionWithBallX].getGlobalBounds()))
+        {
+            block[checkBlockCollisionWithBallX].setPosition(-100, 0); xBallSpeed = -xBallSpeed;
+        }
+    }
     yPositionBall+=yBallSpeed;
-    for (int i=0;i< numberOfCurrentBlock;i++)
-        if ( FloatRect(xPositionBall+3,yPositionBall+3,6,6).intersects(block[i].getGlobalBounds()) ) 
-             {block[i].setPosition(-100,0); yBallSpeed=-yBallSpeed;}
+    for (int checkBlockCollisionWithBallY = 0; checkBlockCollisionWithBallY < MAX_NUMBER_OF_BLOCKS; checkBlockCollisionWithBallY++)
+    {
+        if (FloatRect(xPositionBall + 3, yPositionBall + 3, 6, 6).intersects(block[checkBlockCollisionWithBallY].getGlobalBounds()))
+        {
+            block[checkBlockCollisionWithBallY].setPosition(-100, 0); yBallSpeed = -yBallSpeed;
+        }
+    }
 
     if (xPositionBall<0 || xPositionBall>520)  xBallSpeed=-xBallSpeed;
     if (yPositionBall<0 || yPositionBall>450)  yBallSpeed=-yBallSpeed;
@@ -77,9 +84,9 @@ int arkanoid()
     app.draw(spriteBall);
     app.draw(spritePaddle);
 
-    for (int i = 0; i < numberOfCurrentBlock; i++)
+    for (int currentBlock = 0; currentBlock < MAX_NUMBER_OF_BLOCKS; currentBlock++)
     {
-        app.draw(block[i]);
+        app.draw(block[currentBlock]);
     }
 
     app.display();
