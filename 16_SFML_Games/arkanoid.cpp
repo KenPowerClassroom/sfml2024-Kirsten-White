@@ -26,12 +26,12 @@ int arkanoid()
     int const MAX_COLUMN = 10;
 
     int numberOfCurrentBlock=0;
-    for (int currentRow = 1; currentRow <= MAX_ROW; currentRow++)
+    for (int currentColumn = 1; currentColumn <= MAX_ROW; currentColumn++)
     {
-        for (int currentColumn = 1; currentColumn <= MAX_COLUMN; currentColumn++)
+        for (int currentRow = 1; currentRow <= MAX_COLUMN; currentRow++)
         {
             block[numberOfCurrentBlock].setTexture(textureBlock);
-            block[numberOfCurrentBlock].setPosition(currentRow * 43, currentColumn * 20);
+            block[numberOfCurrentBlock].setPosition(currentColumn * 43, currentRow * 20);
             numberOfCurrentBlock++;
         }
     }
