@@ -2,6 +2,17 @@
 #include <time.h>
 using namespace sf;
 
+void checkCollision(float& xPositionBall, float& yPositionBall, float& BallSpeed, Sprite*block, int const MAX_NUMBER_OF_BLOCKS)
+{
+    for (int checkBlockCollisionWithBall = 0; checkBlockCollisionWithBall < MAX_NUMBER_OF_BLOCKS; checkBlockCollisionWithBall++)
+    {
+        if (FloatRect(xPositionBall + 3, yPositionBall + 3, 6, 6).intersects(block[checkBlockCollisionWithBall].getGlobalBounds()))
+        {
+            block[checkBlockCollisionWithBall].setPosition(-100, 0); BallSpeed = -BallSpeed;
+        }
+    }
+}
+
 int arkanoid()
 {
     srand(time(0));
@@ -53,21 +64,9 @@ int arkanoid()
        }
 
     xPositionBall+=xBallSpeed;
-    for (int checkBlockCollisionWithBallX = 0; checkBlockCollisionWithBallX < MAX_NUMBER_OF_BLOCKS; checkBlockCollisionWithBallX++)
-    {
-        if (FloatRect(xPositionBall + 3, yPositionBall + 3, 6, 6).intersects(block[checkBlockCollisionWithBallX].getGlobalBounds()))
-        {
-            block[checkBlockCollisionWithBallX].setPosition(-100, 0); xBallSpeed = -xBallSpeed;
-        }
-    }
+    checkCollision(xPositionBall, yPositionBall, xBallSpeed, block, MAX_NUMBER_OF_BLOCKS);
     yPositionBall+=yBallSpeed;
-    for (int checkBlockCollisionWithBallY = 0; checkBlockCollisionWithBallY < MAX_NUMBER_OF_BLOCKS; checkBlockCollisionWithBallY++)
-    {
-        if (FloatRect(xPositionBall + 3, yPositionBall + 3, 6, 6).intersects(block[checkBlockCollisionWithBallY].getGlobalBounds()))
-        {
-            block[checkBlockCollisionWithBallY].setPosition(-100, 0); yBallSpeed = -yBallSpeed;
-        }
-    }
+    checkCollision(xPositionBall, yPositionBall, yBallSpeed, block, MAX_NUMBER_OF_BLOCKS);
 
     if (xPositionBall<0 || xPositionBall>520)  xBallSpeed=-xBallSpeed;
     if (yPositionBall<0 || yPositionBall>450)  yBallSpeed=-yBallSpeed;
