@@ -2,7 +2,7 @@
 #include <time.h>
 using namespace sf;
 
-void checkCollision(float& xPositionBall, float& yPositionBall, float& BallSpeed, Sprite*block, int const MAX_NUMBER_OF_BLOCKS)
+void checkCollision(float& xPositionBall, float& yPositionBall, float& BallSpeed, Sprite* block, int const MAX_NUMBER_OF_BLOCKS)
 {
     for (int checkBlockCollisionWithBall = 0; checkBlockCollisionWithBall < MAX_NUMBER_OF_BLOCKS; checkBlockCollisionWithBall++)
     {
@@ -11,6 +11,21 @@ void checkCollision(float& xPositionBall, float& yPositionBall, float& BallSpeed
             block[checkBlockCollisionWithBall].setPosition(-100, 0); BallSpeed = -BallSpeed;
         }
     }
+}
+
+void draw(RenderWindow& app, Sprite& spriteBackground, Sprite& spriteBall, Sprite& spritePaddle, Sprite* block, int const& MAX_NUMBER_OF_BLOCKS)
+{
+    app.clear();
+    app.draw(spriteBackground);
+    app.draw(spriteBall);
+    app.draw(spritePaddle);
+
+    for (int currentBlock = 0; currentBlock < MAX_NUMBER_OF_BLOCKS; currentBlock++)
+    {
+        app.draw(block[currentBlock]);
+    }
+
+    app.display();
 }
 
 int arkanoid()
@@ -68,27 +83,32 @@ int arkanoid()
     yPositionBall+=yBallSpeed;
     checkCollision(xPositionBall, yPositionBall, yBallSpeed, block, MAX_NUMBER_OF_BLOCKS);
 
-    if (xPositionBall<0 || xPositionBall>520)  xBallSpeed=-xBallSpeed;
-    if (yPositionBall<0 || yPositionBall>450)  yBallSpeed=-yBallSpeed;
+    if (xPositionBall < 0 || xPositionBall>520)
+    {
+        xBallSpeed = -xBallSpeed;
+    }
+    if (yPositionBall < 0 || yPositionBall>450)
+    {
+        yBallSpeed = -yBallSpeed;
+    }
 
-    if (Keyboard::isKeyPressed(Keyboard::Right)) spritePaddle.move(6,0);
-    if (Keyboard::isKeyPressed(Keyboard::Left)) spritePaddle.move(-6,0);
+    if (Keyboard::isKeyPressed(Keyboard::Right))
+    {
+        spritePaddle.move(6, 0);
+    }
+    if (Keyboard::isKeyPressed(Keyboard::Left))
+    {
+        spritePaddle.move(-6, 0);
+    }
 
-    if ( FloatRect(xPositionBall,yPositionBall,12,12).intersects(spritePaddle.getGlobalBounds()) ) yBallSpeed=-(rand()%5+2);
+    if (FloatRect(xPositionBall, yPositionBall, 12, 12).intersects(spritePaddle.getGlobalBounds()))
+    {
+        yBallSpeed = -(rand() % 5 + 2);
+    }
 
     spriteBall.setPosition(xPositionBall,yPositionBall);
 
-    app.clear();
-    app.draw(spriteBackground);
-    app.draw(spriteBall);
-    app.draw(spritePaddle);
-
-    for (int currentBlock = 0; currentBlock < MAX_NUMBER_OF_BLOCKS; currentBlock++)
-    {
-        app.draw(block[currentBlock]);
-    }
-
-    app.display();
+    draw(app, spriteBackground, spriteBall, spritePaddle, block, MAX_NUMBER_OF_BLOCKS);
     }
 
   return 0;
