@@ -32,7 +32,10 @@ int arkanoid()
 {
     srand(time(0));
 
-    RenderWindow app(VideoMode(520, 450), "Arkanoid!");
+    int const MAX_WIDTH_SCREEN = 520;
+    int const MAX_HEIGHT_SCREEN = 450;
+
+    RenderWindow app(VideoMode(MAX_WIDTH_SCREEN, MAX_HEIGHT_SCREEN), "Arkanoid!");
     app.setFramerateLimit(60);
 
     Texture textureBlock,textureBackground,textureBall,texturePaddle;
@@ -83,27 +86,31 @@ int arkanoid()
     yPositionBall+=yBallSpeed;
     checkCollision(xPositionBall, yPositionBall, yBallSpeed, block, MAX_NUMBER_OF_BLOCKS);
 
-    if (xPositionBall < 0 || xPositionBall>520)
+    if (xPositionBall < 0 || xPositionBall > MAX_WIDTH_SCREEN)
     {
         xBallSpeed = -xBallSpeed;
     }
-    if (yPositionBall < 0 || yPositionBall>450)
+    if (yPositionBall < 0 || yPositionBall > MAX_HEIGHT_SCREEN)
     {
         yBallSpeed = -yBallSpeed;
     }
 
+    int const PADDLE_SPEED = 6;
+
     if (Keyboard::isKeyPressed(Keyboard::Right))
     {
-        spritePaddle.move(6, 0);
+        spritePaddle.move(PADDLE_SPEED, 0);
     }
     if (Keyboard::isKeyPressed(Keyboard::Left))
     {
-        spritePaddle.move(-6, 0);
+        spritePaddle.move(-PADDLE_SPEED, 0);
     }
 
-    if (FloatRect(xPositionBall, yPositionBall, 12, 12).intersects(spritePaddle.getGlobalBounds()))
+    int const HEIGHT_OF_BALL = 12;
+
+    if (FloatRect(xPositionBall, yPositionBall, HEIGHT_OF_BALL, HEIGHT_OF_BALL).intersects(spritePaddle.getGlobalBounds()))
     {
-        yBallSpeed = -(rand() % 5 + 2);
+        yBallSpeed = -(rand() % 5 + 2); //Number between 2 and 6
     }
 
     spriteBall.setPosition(xPositionBall,yPositionBall);
