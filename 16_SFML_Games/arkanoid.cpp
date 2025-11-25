@@ -4,11 +4,16 @@ using namespace sf;
 
 void checkCollision(float& xPositionBall, float& yPositionBall, float& BallSpeed, Sprite* block, int const MAX_NUMBER_OF_BLOCKS)
 {
+    int const HALF_BALL_SIZE = 3;
+    int const BALL_SIZE = 6;
+
+    int const REMOVE_BLOCK = -100;
     for (int checkBlockCollisionWithBall = 0; checkBlockCollisionWithBall < MAX_NUMBER_OF_BLOCKS; checkBlockCollisionWithBall++)
     {
-        if (FloatRect(xPositionBall + 3, yPositionBall + 3, 6, 6).intersects(block[checkBlockCollisionWithBall].getGlobalBounds()))
+        FloatRect ballShape = FloatRect(xPositionBall + HALF_BALL_SIZE, yPositionBall + HALF_BALL_SIZE, BALL_SIZE, BALL_SIZE);
+        if (ballShape.intersects(block[checkBlockCollisionWithBall].getGlobalBounds()))
         {
-            block[checkBlockCollisionWithBall].setPosition(-100, 0); BallSpeed = -BallSpeed;
+            block[checkBlockCollisionWithBall].setPosition(REMOVE_BLOCK, 0); BallSpeed = -BallSpeed;
         }
     }
 }
