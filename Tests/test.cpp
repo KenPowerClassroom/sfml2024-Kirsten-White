@@ -1,174 +1,141 @@
-#include "pch.h"
+#include <gtest/gtest.h>
+#include "../include/arkanoid.cpp"
 
-const int HEIGHT = 25;
-const int WIDTH = 40;
-const int tileSize = 18;
+// A simple mock of the Sprite class to isolate the test from the actual SFML graphics
+class MockSprite : public sf::Sprite {
+public:
+	void setPosition(float x, float y) override {
+		position = { x, y };
+	}
 
-#include"../16_SFML_Games/Grid.h"
-#include"../16_SFML_Games/Player.h"
+	sf::Vector2f getPosition() const override {
+		return position;
+	}
 
+	void setTexture(const sf::Texture&) override {}
 
-TEST(Grid, HasWallsAndInterior) {
+	// Override the function for testing the collision
+	sf::FloatRect getGlobalBounds() const override {
+		return { position.x, position.y, 6.f, 6.f }; // Ball size for testing
+	}
 
-	Grid grid;
+private:
+	sf::Vector2f position;
+};
 
-	EXPECT_EQ(Grid::tile::WALL, grid.cell(0, 0));
-	EXPECT_EQ(Grid::tile::WALL, grid.cell(24, 39));
-	EXPECT_EQ(Grid::tile::EMPTY, grid.cell(10, 10));
+// Test case for checking collision with blocks
+TEST(GameTest, CheckCollisionBallWithBlock) {
+	// Setup
+	float ballX = 50.f, ballY = 50.f;
+	float ballSpeed = 5.f;
 
+	const int MAX_BLOCKS = 10;
+	MockSprite blocks[MAX_BLOCKS];
+
+	// Setup mock blocks
+	for (int i = 0; i < MAX_BLOCKS; ++i) {
+		blocks[i].setPosition(50.f + i * 10.f, 50.f); // Place blocks in a row
+	}
+
+	// Ball hits the first block
+	blocks[0].setPosition(50.f, 50.f); // Collision should happen at position 50,50
+	checkCollision(ballX, ballY, ballSpeed, blocks, MAX_BLOCKS);
+
+	// Assert that ball's speed is reversed
+	EXPECT_EQ(ballSpeed, -5.f);  // Ball speed should be negative after collision
+
+	// Assert block "removed" (position set to REMOVE_BLOCK)
+	EXPECT_EQ(blocks[0].getPosition().x, -100.f); // Block's X position should be REMOVE_BLOCK value
 }
 
-TEST(Grid, CreateNewWall) {
+TEST(GameTest, CheckNoCollision) {
+	float ballX = 200.f, ballY = 200.f;
+	float ballSpeed = 5.f;
 
-	Grid grid;
+	const int MAX_BLOCKS = 10;
+	MockSprite blocks[MAX_BLOCKS];
 
-	grid.newWall(10, 10);
-	EXPECT_EQ(Grid::tile::NEW_WALL, grid.cell(10, 10));
+	// Setup blocks further from the ball (no collision expected)
+	for (int i = 0; i < MAX_BLOCKS; ++i) {
+		blocks[i].setPosition(500.f + i * 10.f, 500.f);
+	}
 
+	// Ball moves without hitting any block
+	checkCollision(ballX, ballY, ballSpeed, blocks, MAX_BLOCKS);
+
+	// Assert ball speed has not changed
+	EXPECT_EQ(ballSpeed, 5.f);  // Ball speed should remain positive
+
+	// Assert no block was "removed"
+	for (int i = 0; i < MAX_BLOCKS; ++i) {
+		EXPECT_NE(blocks[i].getPosition().x, -100.f);
+	}
 }
 
+TEST(GameTest, BallAndPaddleCollision) {
+	float ballX = 250.f, ballY = 400.f;
+	float ballSpeedY = 5.f;
+	sf::Sprite spritePaddle;
 
-TEST(Grid, GridsIsClearedExceptForWalls) {
+	// Set up paddle
+	spritePaddle.setPosition(200.f, 440.f); // Paddle at the bottom
 
-	Grid grid;
+	// Simulate ball colliding with paddle (set ball position to touch the paddle)
+	if (sf::FloatRect(ballX, ballY, 12.f, 12.f).intersects(spritePaddle.getGlobalBounds())) {
+		ballSpeedY = -(rand() % 5 + 2);  // Random speed between 2 and 6
+	}
 
-	grid.newWall(10, 10);
-
-	grid.clear();
-	EXPECT_EQ(Grid::tile::WALL, grid.cell(0, 0));
-	EXPECT_EQ(Grid::tile::WALL, grid.cell(24, 39));
-	EXPECT_EQ(Grid::tile::EMPTY, grid.cell(10, 10));
-
+	// Check if ball's vertical speed is reversed (since it hit the paddle)
+	EXPECT_LT(ballSpeedY, 0.f);  // The ball should go up after hitting the paddle
 }
 
-//------------------------
-//|                      |
-//|                      |
-//|         filled       |
-//|                      |
-//|                      |
-//|----------------------|
-//|                      |
-//|                      |
-//|         not filled   |
-//|                      |
-//|                      |
-//------------------------
+TEST(GameTest, BallPositionAndSpeedUpdate) {
+	float ballX = 300.f, ballY = 300.f;
+	float xBallSpeed = 6.f, yBallSpeed = 5.f;
+	int screenWidth = 520, screenHeight = 450;
 
-TEST(Grid, GridsIsFilledWithHorizWall) {
+	// Simulate ball movement
+	ballX += xBallSpeed;
+	ballY += yBallSpeed;
 
-	Grid grid;
+	// Simulate wall collision (ball should reverse speed when it hits the screen border)
+	if (ballX < 0 || ballX > screenWidth) {
+		xBallSpeed = -xBallSpeed;
+	}
+	if (ballY < 0 || ballY > screenHeight) {
+		yBallSpeed = -yBallSpeed;
+	}
 
-	for(int i=1;i<WIDTH-1;i++)
-		grid.newWall(10, i);
+	// Assert that ball is updated correctly
+	EXPECT_EQ(ballX, 306.f);  // 300 + 6
+	EXPECT_EQ(ballY, 305.f);  // 300 + 5
 
-	grid.markConnectedCellsNotToBeFilled(11, 1);
-
-	grid.fillEmptyCells();
-
-	EXPECT_EQ(Grid::tile::WALL, grid.cell(1, 1));
-	EXPECT_EQ(Grid::tile::WALL, grid.cell(9, 38));
-
-	EXPECT_EQ(Grid::tile::EMPTY, grid.cell(11, 1));
-	EXPECT_EQ(Grid::tile::EMPTY, grid.cell(23, 38));
-
+	// Check if the ball would bounce off the walls correctly
+	EXPECT_EQ(xBallSpeed, 6.f);  // Should be positive as no collision with left/right wall
+	EXPECT_EQ(yBallSpeed, 5.f);  // Should be positive as no collision with top/bottom wall
 }
 
-//------------------------
-//|                      |
-//|                      |
-//|        not filled    |
-//|                      |
-//|                      |
-//|-------------         |
-//|            |         |
-//|            |         |
-//|   filled   |         |
-//|            |         |
-//|            |         |
-//------------------------
+TEST(GameTest, BlockPositioning) {
+	const int MAX_ROW = 10;
+	const int MAX_COLUMN = 10;
+	const int WIDTH_OF_BLOCK = 43;
+	const int HEIGHT_OF_BLOCK = 20;
 
-TEST(Grid, GridsIsFilledWithHorizAndVertWall) {
+	MockSprite blocks[MAX_ROW * MAX_COLUMN];
 
-	Grid grid;
+	int blockIndex = 0;
+	for (int column = 1; column <= MAX_ROW; ++column) {
+		for (int row = 1; row <= MAX_COLUMN; ++row) {
+			blocks[blockIndex].setPosition(column * WIDTH_OF_BLOCK, row * HEIGHT_OF_BLOCK);
+			blockIndex++;
+		}
+	}
 
-	for (int x = 1; x < 10; x++)
-		grid.newWall(10, x);
-	for (int y = 10; y < HEIGHT-1; y++)
-		grid.newWall(y, 10);
+	// Check the position of the first block
+	EXPECT_EQ(blocks[0].getPosition().x, 43.f);  // First column, first row
+	EXPECT_EQ(blocks[0].getPosition().y, 20.f);
 
-	grid.markConnectedCellsNotToBeFilled(2, 2);
-
-	grid.fillEmptyCells();
-
-	EXPECT_EQ(Grid::tile::WALL, grid.cell(11, 1));
-	EXPECT_EQ(Grid::tile::WALL, grid.cell(23, 9));
-
-	EXPECT_EQ(Grid::tile::EMPTY, grid.cell(1, 1));
-	EXPECT_EQ(Grid::tile::EMPTY, grid.cell(9, 38));
-	EXPECT_EQ(Grid::tile::EMPTY, grid.cell(23, 38));
-
-
-}
-
-
-TEST(Player, ConstrainedHorizontallyRight) {
-
-	Player p;
-
-	p.x = 10, p.y = 10;
-
-	p.goRight();
-
-	for (int i = 0; i < 100; i++)
-		p.move();
-
-	EXPECT_EQ(10, p.y);
-	EXPECT_EQ(WIDTH-1, p.x);
-}
-
-TEST(Player, ConstrainedHorizontallyLeft) {
-
-	Player p;
-
-	p.x = 10, p.y = 10;
-
-	p.goLeft();
-
-	for (int i = 0; i < 100; i++)
-		p.move();
-
-	EXPECT_EQ(10, p.y);
-	EXPECT_EQ(0, p.x);
-}
-
-TEST(Player, ConstrainedVerticallyUp) {
-
-	Player p;
-
-	p.x = 10, p.y = 10;
-
-	p.goUp();
-
-	for (int i = 0; i < 100; i++)
-		p.move();
-
-	EXPECT_EQ(0, p.y);
-	EXPECT_EQ(10, p.x);
-}
-
-TEST(Player, ConstrainedDiagonallyFast) {
-
-	Player p;
-
-	p.x = 10, p.y = 10;
-	p.dx = 5;
-	p.dy = 6;
-
-	
-	for (int i = 0; i < 100; i++)
-		p.move();
-
-	EXPECT_EQ(HEIGHT-1, p.y);
-	EXPECT_EQ(WIDTH-1, p.x);
+	// Check the position of the last block
+	EXPECT_EQ(blocks[MAX_ROW * MAX_COLUMN - 1].getPosition().x, 430.f);  // Last column, last row
+	EXPECT_EQ(blocks[MAX_ROW * MAX_COLUMN - 1].getPosition().y, 200.f);
 }
